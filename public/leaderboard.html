@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Xếp Hạng 🏆</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      color: #333;
+    }
+
+    h1 {
+      font-size: 2em;
+      color: #fff;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    table {
+      width: 90%;
+      max-width: 700px;
+      border-collapse: collapse;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      animation: fadeIn 0.5s ease;
+    }
+
+    th, td {
+      padding: 15px;
+      text-align: center;
+      font-size: 1em;
+    }
+
+    th {
+      background: #1976d2;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    tr:nth-child(even) { background: #f4f7fb; }
+    tr:hover { background: #e3f2fd; transition: 0.2s; }
+
+    .rank-1 td { background: #fff8e1; font-weight: bold; }
+    .rank-2 td { background: #f0f0f0; }
+    .rank-3 td { background: #ffe0b2; }
+
+    button {
+      margin-top: 25px;
+      padding: 10px 20px;
+      border: none;
+      background: #1976d2;
+      color: white;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <h1>🏆 Bảng Xếp Hạng Người Chơi 🏅</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Hạng</th>
+        <th>Người Chơi</th>
+        <th>Điểm Tổng</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboard-body">
+      <tr><td colspan="3">Đang tải dữ liệu...</td></tr>
+    </tbody>
+  </table>
+
+  <button onclick="window.location.href='index.html'">⬅️ Quay lại trang chủ</button>
+
+  <script>
+    async function loadLeaderboard() {
+      try {
+        const res = await fetch("/api/scores/leaderboard");
+        const data = await res.json();
+        const tbody = document.getElementById("leaderboard-body");
+        tbody.innerHTML = "";
+
+        if (!data.success || !data.leaderboard.length) {
+          tbody.innerHTML = `<tr><td colspan="3">Chưa có người chơi nào 😅</td></tr>`;
+          return;
+        }
+
+        data.leaderboard.forEach((player, index) => {
+          const tr = document.createElement("tr");
+          tr.className = `rank-${player.rank_position}`;
+          tr.innerHTML = `
+            <td>${player.rank_position}</td>
+            <td>${player.player_name}</td>
+            <td>${player.total_score}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("Lỗi tải leaderboard:", err);
+        document.getElementById("leaderboard-body").innerHTML =
+          `<tr><td colspan="3">⚠️ Lỗi tải dữ liệu!</td></tr>`;
+      }
+    }
+
+    loadLeaderboard();
+  </script>
+</body>
+</html>

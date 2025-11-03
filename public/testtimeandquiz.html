@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Trắc Nghiệm</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #31ADD1, #F3D343);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #quiz {
+      width: 400px;
+      padding: 20px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    .answer {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: none;
+      border-radius: 5px;
+      background: #31ADD1;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .answer:hover {
+      background: #2789a8;
+    }
+    #timer {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="quiz">
+    <h2 id="question">Câu hỏi sẽ hiện ở đây</h2>
+    <ul style="list-style:none; padding:0;">
+      <li><button class="answer">Đáp án 1</button></li>
+      <li><button class="answer">Đáp án 2</button></li>
+      <li><button class="answer">Đáp án 3</button></li>
+      <li><button class="answer">Đáp án 4</button></li>
+    </ul>
+    <div id="timer">⏳ Thời gian: <span id="countdown">60</span>s</div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "Thủ đô của Việt Nam là gì?",
+        answers: ["Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Huế"],
+        correct: 1
+      },
+      {
+        question: "2 + 2 = ?",
+        answers: ["3", "4", "5", "6"],
+        correct: 1
+      },
+      {
+        question: "HTML viết tắt của?",
+        answers: ["Hyper Text Markup Language", "Home Tool Markup Language", "Hyperlinks Text Mark Language", "Hyper Tool Multi Language"],
+        correct: 0
+      }
+    ];
+
+    let current = 0;
+    let time = 60; // 60 giây
+    let timer;
+    let score = 0;
+
+    function loadQuestion() {
+      document.getElementById("question").innerText = questions[current].question;
+      const buttons = document.querySelectorAll(".answer");
+      buttons.forEach((btn, i) => {
+        btn.innerText = questions[current].answers[i];
+        btn.onclick = () => checkAnswer(i);
+      });
+    }
+
+    function checkAnswer(i) {
+      if (i === questions[current].correct) {
+        score++;
+        alert("Đúng rồi ✅");
+      } else {
+        alert("Sai rồi ❌");
+      }
+      current++;
+      if (current < questions.length) {
+        loadQuestion();
+      } else {
+        endQuiz();
+      }
+    }
+
+    function startTimer() {
+      timer = setInterval(() => {
+        time--;
+        document.getElementById("countdown").innerText = time;
+        if (time <= 0) {
+          endQuiz();
+        }
+      }, 1000);
+    }
+
+    function endQuiz() {
+      clearInterval(timer);
+      document.getElementById("quiz").innerHTML =
+        `<h2>Bạn trả lời đúng ${score}/${questions.length} câu</h2>
+         <p>🎉 Quiz kết thúc!</p>`;
+    }
+
+    // Chạy khi load trang
+    loadQuestion();
+    startTimer();
+  </script>
+</body>
+</html>

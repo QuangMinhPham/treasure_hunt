@@ -1,0 +1,133 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #74b9ff, #a29bfe);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  width: 90%;
+  max-width: 500px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+h1 {
+  font-size: 1.8rem;
+  color: #0984e3;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #636e72;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.file-input {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.file-input input[type="file"] {
+  display: none;
+}
+
+.file-input label {
+  display: block;
+  background-color: #dfe6e9;
+  color: #2d3436;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  border: 2px dashed #74b9ff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.file-input label:hover {
+  background-color: #74b9ff;
+  color: white;
+}
+
+.btn {
+  background: #0984e3;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+  width: 100%;
+}
+
+.btn:hover {
+  background: #74b9ff;
+}
+
+.progress {
+  width: 100%;
+  height: 8px;
+  background-color: #dfe6e9;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+#progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00b894, #00cec9);
+  transition: width 0.4s ease;
+}
+
+#message {
+  margin-top: 1.2rem;
+  font-size: 0.95rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+}
+
+#message.success {
+  background-color: #dff9fb;
+  color: #00b894;
+  border: 1px solid #00b894;
+}
+
+#message.error {
+  background-color: #ffeaa7;
+  color: #d63031;
+  border: 1px solid #fab1a0;
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.4rem;
+  }
+  .card {
+    padding: 1.5rem;
+  }
+}

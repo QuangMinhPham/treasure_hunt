@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Kết quả thử thách 🎯</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(120deg, #a8edea, #fed6e3);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .score-box {
+      background: rgba(255,255,255,0.95);
+      padding: 40px 60px;
+      border-radius: 18px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    .score-box h1 { color: #333; margin-bottom: 15px; }
+    .score-value {
+      font-size: 50px;
+      font-weight: 700;
+      color: #4CAF50;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #4CAF50;
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #43A047; }
+  </style>
+</head>
+<body>
+
+  <div class="score-box">
+    <h1>🎉 Kết quả của bạn 🎉</h1>
+    <div id="scoreDisplay" class="score-value">0</div>
+    <p id="correctAnswers"></p>
+    <p id="rank"></p>
+    <button onclick="window.location.href='lessons.html'">🔙 Quay lại bài học</button>
+    <button onclick="window.location.href='leaderboard.html'">🏆 Xem bảng xếp hạng</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const score = params.get("score");
+    const correct = params.get("correct");
+    const total = params.get("total");
+
+    document.getElementById("scoreDisplay").textContent = `${score} điểm`;
+    document.getElementById("correctAnswers").textContent = `Đúng ${correct}/${total} câu`;
+
+    async function getRank() {
+      const res = await fetch(`/api/leaderboard/rank?user_id=1`);
+      const data = await res.json();
+      if (data.rank) {
+        document.getElementById("rank").textContent = `🏅 Xếp hạng hiện tại: ${data.rank}`;
+      }
+    }
+
+    getRank();
+  </script>
+
+</body>
+</html>

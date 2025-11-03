@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dọn Rác Biển 🌊</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: url("images/beach.jpeg") no-repeat center center/cover;
+      overflow: hidden;
+      font-family: "Poppins", Arial, sans-serif;
+    }
+
+    /* --- Thanh hiển thị điểm & thời gian --- */
+    #gameInfo {
+      position: fixed;
+      top: 15px;
+      right: 25px;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 12px 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-weight: 600;
+      font-size: 18px;
+      color: #333;
+      z-index: 1000;
+    }
+
+    #timer { color: #e53935; }
+    #score { color: #1e88e5; }
+
+    .trash {
+      width: 70px;
+      height: 70px;
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.2s, filter 0.3s;
+    }
+    .trash:hover { transform: scale(1.1); }
+    .trash.disabled {
+      filter: grayscale(100%) brightness(0.1);
+      pointer-events: none;
+    }
+
+    #questionBox {
+      display: none;
+      position: fixed;
+      top: 25%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      width: 420px;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+      z-index: 100;
+    }
+
+    #questionText {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    #answers button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #4CAF50, #43A047);
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.25s;
+    }
+
+    #answers button:hover {
+      background: linear-gradient(135deg, #43A047, #2E7D32);
+    }
+
+    #resultBox {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.95);
+      padding: 40px 50px;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      text-align: center;
+      font-size: 22px;
+      color: #333;
+      z-index: 999;
+      animation: fadeIn 0.4s ease;
+    }
+
+    #resultBox h2 { margin-bottom: 15px; color: #1e88e5; }
+
+    @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+  </style>
+</head>
+<body>
+
+  <!-- Thông tin game -->
+  <div id="gameInfo">
+    ⏰ Thời gian: <span id="timer">600</span>s | ⭐ Điểm: <span id="score">0</span>
+  </div>
+
+  <!-- Popup câu hỏi -->
+  <div id="questionBox">
+    <p id="questionText"></p>
+    <div id="answers"></div>
+  </div>
+
+  <!-- Bảng kết quả -->
+  <div id="resultBox">
+    <h2>Kết thúc thử thách!</h2>
+    <p id="finalMessage"></p>
+    <button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;border:none;border-radius:8px;background:#4CAF50;color:white;cursor:pointer;">Chơi lại</button>
+  </div>
+
+    <script>
+    // === Lấy chapter_id từ URL ===
+    const params = new URLSearchParams(window.location.search);
+    const chapterId = params.get("chapter_id") || 1;
+
+    const API_URL = `/api/challenges/${chapterId}`; // backend endpoint
+    
+    // === Cấu hình game ===
+    const trashImages = [
+      "bottle.png", "can1.png", "can2.png", "bag.png",
+      "apple.png", "banana.png", "paper.png", "glass.png"
+    ];
+    let gameQuestions = [];
+    let currentTrash = null;
+    let remainingTrash = 0;
+    let totalTime = 600; // 10 phút = 600 giây
+    let timerInterval = null;
+    let score = 0;
+
+    // === Khi tải xong DOM ===
+    document.addEventListener("DOMContentLoaded", () => {
+      loadQuestions();
+    });
+
+    // === Tải câu hỏi từ backend ===
+    async function loadQuestions() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        gameQuestions = data.questions || [];
+
+        if (!gameQuestions.length) {
+          alert("Không có câu hỏi nào trong chương này 😢");
+          return;
+        }
+
+        remainingTrash = gameQuestions.length;
+        spawnTrashNonOverlap(remainingTrash);
+        startTimer();
+      } catch (err) {
+        console.error("Lỗi tải câu hỏi:", err);
+        alert("Không thể tải câu hỏi từ máy chủ 😢");
+      }
+    }
+
+    // === Sinh rác không chồng nhau ===
+    function spawnTrashNonOverlap(count) {
+      const positions = [];
+      const trashSize = 70;
+      const minDistance = 100;
+
+      for (let i = 0; i < count; i++) {
+        let x, y, valid;
+        do {
+          valid = true;
+          x = Math.random() * (window.innerWidth - trashSize - 60) + 30;
+          y = Math.random() * (window.innerHeight - trashSize - 120) + 100;
+
+          for (let pos of positions) {
+            const dx = pos.x - x;
+            const dy = pos.y - y;
+            if (Math.sqrt(dx * dx + dy * dy) < minDistance) {
+              valid = false;
+              break;
+            }
+          }
+        } while (!valid);
+
+        positions.push({ x, y });
+        const img = document.createElement("img");
+        // Tạo danh sách hình đã được trộn ngẫu nhiên
+        if (!window.randomTrashList || window.randomTrashList.length === 0) {
+          window.randomTrashList = [...trashImages].sort(() => Math.random() - 0.5);
+        }
+        img.src = "images/" + window.randomTrashList[i % window.randomTrashList.length];
+
+        img.className = "trash";
+        img.style.left = x + "px";
+        img.style.top = y + "px";
+        img.dataset.index = i;
+
+        img.addEventListener("click", () => {
+          currentTrash = img;
+          showQuestion(i);
+        });
+
+        document.body.appendChild(img);
+      }
+    }
+
+    // === Hiện popup câu hỏi ===
+    function showQuestion(index) {
+      const q = gameQuestions[index];
+      if (!q) return;
+
+      const box = document.getElementById("questionBox");
+      box.style.display = "block";
+      document.getElementById("questionText").textContent = q.text;
+
+      const answersDiv = document.getElementById("answers");
+      answersDiv.innerHTML = "";
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.onclick = () => checkAnswer(index, idx);
+        answersDiv.appendChild(btn);
+      });
+    }
+
+    // === Kiểm tra đáp án ===
+    function checkAnswer(index, selected) {
+      const q = gameQuestions[index];
+      const trash = document.querySelector(`.trash[data-index="${index}"]`);
+
+      if (selected === q.correctIndex) {
+        trash.remove();
+        score += 10;
+        updateScore();
+      } else {
+        trash.classList.add("disabled");
+        // trash.style.filter = "grayscale(100%) opacity(0.5)";
+        trash.style.filter = "brightness(0.2)"; // 👈 thêm dòng này
+
+      }
+
+      remainingTrash--;
+      hideQuestion();
+
+      if (remainingTrash === 0) endGame();
+    }
+
+    // === Ẩn popup ===
+    function hideQuestion() {
+      document.getElementById("questionBox").style.display = "none";
+    }
+
+    // === Đếm ngược tổng thời gian ===
+    function startTimer() {
+      const timeEl = document.getElementById("timer");
+      timerInterval = setInterval(() => {
+        totalTime--;
+        const min = Math.floor(totalTime / 60);
+        const sec = totalTime % 60;
+        timeEl.textContent = `${min}:${sec.toString().padStart(2, "0")}`;
+        if (totalTime <= 0) {
+          clearInterval(timerInterval);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    // === Cập nhật điểm ===
+    function updateScore() {
+      document.getElementById("score").textContent = score;
+    }
+
+    // === Kết thúc game ===
+    function endGame() {
+      clearInterval(timerInterval);
+      hideQuestion();
+
+      const box = document.getElementById("resultBox");
+      box.style.display = "block";
+      let msg = "";
+
+      if (score >= 80) msg = `🌟 Xuất sắc! Bạn đạt ${score} điểm`;
+      else if (score >= 50) msg = `👍 Khá lắm! Bạn đạt ${score} điểm`;
+      else msg = `💪 Cố gắng hơn nhé! Bạn được ${score} điểm`;
+
+      document.getElementById("finalMessage").innerHTML = `
+        <h2>${msg}</h2>
+        <button onclick="window.location.href='challenges.html'">🔙 Các thử thách</button>
+        <button onclick="window.location.reload()">🔁 Chơi lại</button>
+        <button onclick="window.location.href='leaderboard.html'">🏆 Bảng xếp hạng</button>
+        <button onclick="window.location.href='lessons.html'">🔙 Danh sách bài</button>
+        <button onclick="window.location.href='index.html'">🏠 Trang chủ</button>
+      `;
+      saveScore(score);
+    }
+
+    async function saveScore(score) {
+      const token = localStorage.getItem("token"); // token lưu khi login
+      const params = new URLSearchParams(window.location.search);
+      const chapterId = params.get("chapter_id");
+      const challengeId = 1+((chapterId-1)*3);; // challenge tương ứng trong DB
+
+      const res = await fetch("/api/scores/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          chapter_id: chapterId,
+          challenge_id: challengeId,
+          score: score
+        })
+      });
+
+      const data = await res.json();
+      console.log("Kết quả lưu điểm:", data);
+    }
+
+  </script>
+
+</body>
+</html>

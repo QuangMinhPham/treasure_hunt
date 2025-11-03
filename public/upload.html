@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tải lên bài tập - Treasure Hunt</title>
+  <link rel="stylesheet" href="upload.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>📘 Upload Bài Tập</h1>
+      <p class="subtitle">Giáo viên có thể tải lên file <b>.docx</b> để hệ thống tự động phân tích và lưu câu hỏi vào cơ sở dữ liệu.</p>
+
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="file-input">
+          <input type="file" id="docx" name="file" accept=".docx" required />
+          <label for="docx" id="fileLabel">Chọn file .docx của bạn</label>
+        </div>
+
+        <button type="submit" class="btn">📤 Tải Lên & Import</button>
+
+        <div class="progress">
+          <div id="progressBar"></div>
+        </div>
+      </form>
+
+      <div id="message"></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const fileInput = document.getElementById("docx");
+    const fileLabel = document.getElementById("fileLabel");
+    const progressBar = document.getElementById("progressBar");
+    const messageBox = document.getElementById("message");
+
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length > 0) {
+        fileLabel.textContent = "📄 " + fileInput.files[0].name;
+      } else {
+        fileLabel.textContent = "Chọn file .docx của bạn";
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      messageBox.textContent = "";
+      progressBar.style.width = "0%";
+
+      const file = fileInput.files[0];
+      if (!file) return alert("Vui lòng chọn file .docx trước khi tải lên.");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/upload", true);
+
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          const percent = (event.loaded / event.total) * 100;
+          progressBar.style.width = percent + "%";
+        }
+      });
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          messageBox.innerHTML = "✅ <b>Tải lên thành công!</b> Hệ thống đã import bài tập.";
+          messageBox.className = "success";
+          form.reset();
+          fileLabel.textContent = "Chọn file .docx của bạn";
+          progressBar.style.width = "0%";
+        } else {
+          messageBox.innerHTML = "❌ Lỗi khi tải lên: " + xhr.responseText;
+          messageBox.className = "error";
+        }
+      };
+
+      xhr.onerror = () => {
+        messageBox.innerHTML = "⚠️ Không thể kết nối đến máy chủ!";
+        messageBox.className = "error";
+      };
+
+      xhr.send(formData);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+    /* ---------- Reset & base ---------- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: "Poppins", system-ui, Arial, sans-serif;
+      background: url('images/bg1.jpg') center/cover fixed no-repeat;
+      color:#222;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* ---------- Toolbar ---------- */
+    .toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 24px;
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter: blur(6px);
+    }
+    .toolbar .title{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      font-weight:700;
+      color: #ffd166;
+      font-size:1.15rem;
+    }
+    .toolbar button{
+      background: rgba(255,255,255,0.12);
+      color:#fff;
+      border: none;
+      padding:8px 14px;
+      border-radius:10px;
+      cursor:pointer;
+    }
+    .toolbar button:hover{ background: rgba(255,255,255,0.22); }
+
+    /* ---------- Page layout ---------- */
+    .page{
+      min-height: calc(100vh - 72px);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      padding:36px 18px;
+      gap:20px;
+    }
+
+    /* ---------- Carousel area ---------- */
+    #lesson{
+      width:100%;
+      max-width:1200px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .btn {
+      background: #fff;
+      color: #6b4226;
+      border-radius:50%;
+      width:56px;
+      height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      cursor:pointer;
+      transition: transform .18s, background .18s;
+    }
+    .btn:hover { transform: translateY(-3px); background: peru; color: #fff; }
+
+    /* .main-lesson{
+      flex:1;
+      overflow:hidden;
+      border-radius:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.05));
+      padding: 26px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    } */
+
+    .main-lesson {
+      flex:1;
+      overflow:hidden;
+      border-radius:18px;
+      background: rgba(255,255,255,0.1);
+      padding: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .slides{
+      display:flex;
+      gap:28px;
+      align-items:center;
+      transition: transform .45s ease;
+      will-change: transform;
+      user-select: none;
+      padding-bottom:8px;
+      margin: 15px;
+    }
+
+    .slide{
+      width: 260px;
+      min-width:260px;
+      max-width:260px;
+      height: 400px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 18px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      overflow:hidden;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s;
+    }
+    .slide:hover{
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 14px 28px rgba(0,0,0,0.28);
+    }
+
+    .lesson-img img{
+      width:100%;
+      height:280px;
+      object-fit:cover;
+      border-bottom: 4px solid #ffd166;
+      user-drag: none; /* cho WebKit (Chrome, Safari) */
+      -webkit-user-drag: none;
+    }
+
+    .lesson-name{
+      padding:14px;
+      text-align:center;
+      width:100%;
+    }
+    .lesson-number{
+      color:#b86b00;
+      font-weight:800;
+      font-size:20px;
+    }
+    .lesson-title{
+      margin-top:8px;
+      font-size:16px;
+      font-weight:700;
+      color:#333;
+    }
+
+    /* responsive */
+    @media (max-width: 900px){
+      .slide{ width:220px; min-width:220px; height:380px }
+      .lesson-img img{ height:240px }
+      .main-lesson{ padding:18px }
+      .toolbar .title{ font-size:1rem }
+    }
+    @media (max-width:640px){
+      .btn{ width:46px; height:46px }
+      #lesson{ gap:8px }
+      .slides{ gap:16px }
+      .slide{ width:200px; min-width:200px; height:360px }
+      .lesson-img img{ height:220px }
+    }

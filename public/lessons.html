@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Danh sách bài học | Đảo Giấu Vàng 🏝️</title>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="lessons.css">
+  
+</head>
+<body>
+  <div class="toolbar">
+    <div class="title">
+      <i class="fa-solid fa-map-marked-alt"></i>
+      <span>ĐẢO GIẤU VÀNG — BÀI HỌC</span>
+    </div>
+    <div>
+      <button onclick="location.href='index.html'"><i class="fa-solid fa-house"></i> Trang chủ</button>
+    </div>
+  </div>
+
+  <div class="page">
+    <section id="lesson">
+      <div class="btn btn-left" id="btnLeft" title="Lùi"><i class="fa-solid fa-chevron-left"></i></div>
+      <div class="main-lesson">
+        <div class="slides" id="slidesContainer">
+            <!-- slides được chèn bằng JS -->
+        </div>
+      </div>
+      <div class="btn btn-right" id="btnRight" title="Tiến"><i class="fa-solid fa-chevron-right"></i></div>
+    </section>
+  </div>
+
+
+  <!-- <script>
+    const slidesContainer = document.getElementById("slidesContainer");
+    const API_URL = "/api/lessons";
+
+    // ======= Lấy dữ liệu bài học từ server =======
+    async function loadLessons() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        renderLessons(data.lessons);
+      } catch (err) {
+        console.error("Lỗi khi tải bài học:", err);
+      }
+    }
+
+    // ======= Hiển thị danh sách bài học =======
+    function renderLessons(lessons) {
+      slidesContainer.innerHTML = "";
+      lessons.forEach((lesson) => {
+        const slide = document.createElement("div");
+        slide.className = "slide";
+        slide.dataset.chapter = lesson.chapter_id;
+        slide.innerHTML = `
+          <div class="lesson-img">
+            <img class="lesson-image" src="images/${lesson.chapter_id}.jpg" alt="banner" draggable="false">
+          </div>
+          <div class="lesson-name">
+            <div class="lesson-number">Bài ${lesson.chapter_id}</div>
+            <div class="lesson-title">${lesson.title}</div>
+          </div>
+        `;
+
+        slidesContainer.appendChild(slide);
+      });
+
+      initSlideEvents();
+    }
+
+    // ======= Slide cuộn ngang + xử lý drag/click =======
+    function initSlideEvents() {
+      const slides = document.querySelector(".slides");
+      const slide = document.querySelectorAll(".slide");
+      const btnleft = document.querySelector(".btn-left");
+      const btnright = document.querySelector(".btn-right");
+      let index = 0;
+
+      // --- Flags để xác định kéo/nhấp ---
+      let isDown = false;
+      let startX = 0;
+      let scrollLeft = 0;
+      let wasDragging = false;      // có kéo không
+      let leftWhileDown = false;    // có rời vùng slider khi đang giữ không
+
+      const updateSlide = () => {
+        let width = slide[0].offsetWidth;
+        let margin = parseInt(getComputedStyle(slide[0]).marginRight) || 0;
+        slides.style.transform = `translateX(${-(width + margin * 2) * index}px)`;
+        document.querySelector(".active")?.classList.remove("active");
+        slide[index].classList.add("active");
+      };
+
+      // --- Nút điều hướng ---
+      btnright.addEventListener("click", () => {
+        index++;
+        if (index === slide.length) index = 0;
+        updateSlide();
+      });
+
+      btnleft.addEventListener("click", () => {
+        index--;
+        if (index < 0) index = slide.length - 1;
+        updateSlide();
+      });
+
+      // --- Kéo bằng chuột ---
+      const slider = document.querySelector(".main-lesson");
+
+      slider.addEventListener("mousedown", (e) => {
+        isDown = true;
+        wasDragging = false;
+        leftWhileDown = false;
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+      });
+
+      slider.addEventListener("mouseleave", (e) => {
+        if (isDown) leftWhileDown = true;
+        isDown = false;
+      });
+
+      slider.addEventListener("mouseup", (e) => {
+        isDown = false;
+        setTimeout(() => {
+          wasDragging = false;
+          leftWhileDown = false;
+        }, 50);
+      });
+
+      slider.addEventListener("mousemove", (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 2; // tốc độ kéo
+        if (Math.abs(x - startX) > 5) wasDragging = true;
+        slider.scrollLeft = scrollLeft - walk;
+      });
+
+      // --- Click để điều hướng ---
+      slidesContainer.addEventListener("click", (e) => {
+        const slideEl = e.target.closest(".slide");
+        if (!slideEl) return;
+
+        // Nếu vừa kéo hoặc rời vùng => không chuyển trang
+        if (wasDragging || leftWhileDown) {
+          e.stopPropagation();
+          return;
+        }
+
+        const chapterId = slideEl.dataset.chapter;
+        if (chapterId) {
+          window.location.href = `challenges.html?chapter_id=${chapterId}`;
+        }
+      });
+    }
+
+    // ======= Khởi chạy =======
+    loadLessons();
+</script>
+ -->
+
+<script>
+  const slidesContainer = document.getElementById("slidesContainer");
+  const API_URL = "/api/lessons";
+
+  // ======= Lấy dữ liệu bài học từ server =======
+  async function loadLessons() {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      renderLessons(data.lessons);
+    } catch (err) {
+      console.error("Lỗi khi tải bài học:", err);
+    }
+  }
+
+  // ======= Hiển thị danh sách bài học =======
+  function renderLessons(lessons) {
+    slidesContainer.innerHTML = "";
+    lessons.forEach((lesson) => {
+      const slide = document.createElement("div");
+      slide.className = "slide";
+      slide.dataset.chapter = lesson.chapter_id;
+
+      slide.innerHTML = `
+        <div class="lesson-img">
+          <img class="lesson-image" 
+               src="images/${lesson.chapter_id}.jpg" 
+               alt="banner" 
+               draggable="false" 
+               ondragstart="return false;">
+        </div>
+        <div class="lesson-name">
+          <div class="lesson-number">Bài ${lesson.chapter_id}</div>
+          <div class="lesson-title">${lesson.title}</div>
+        </div>
+      `;
+
+      slidesContainer.appendChild(slide);
+    });
+
+    initSlideEvents();
+  }
+
+  // ======= Slide cuộn ngang + xử lý drag/click =======
+  function initSlideEvents() {
+    const slides = document.querySelector(".slides");
+    const slide = document.querySelectorAll(".slide");
+    const btnleft = document.querySelector(".btn-left");
+    const btnright = document.querySelector(".btn-right");
+    const slider = document.querySelector(".main-lesson");
+
+    let index = 0;
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    let wasDragging = false;
+    let leftWhileDown = false;
+
+    const updateSlide = () => {
+      let width = slide[0].offsetWidth;
+      let margin = parseInt(getComputedStyle(slide[0]).marginRight) || 0;
+      slides.style.transform = `translateX(${-(width + margin * 2) * index}px)`;
+      document.querySelector(".active")?.classList.remove("active");
+      slide[index].classList.add("active");
+    };
+
+    // --- Nút chuyển ---
+    btnright.addEventListener("click", () => {
+      index = (index + 1) % slide.length;
+      updateSlide();
+    });
+
+    btnleft.addEventListener("click", () => {
+      index = (index - 1 + slide.length) % slide.length;
+      updateSlide();
+    });
+
+    // --- Kéo chuột để cuộn ---
+    slider.addEventListener("mousedown", (e) => {
+      isDown = true;
+      wasDragging = false;
+      leftWhileDown = false;
+      startX = e.pageX;
+      scrollLeft = slider.scrollLeft;
+      slider.classList.add("active");
+    });
+
+    slider.addEventListener("mouseleave", () => {
+      if (isDown) leftWhileDown = true;
+      isDown = false;
+      slider.classList.remove("active");
+    });
+
+    slider.addEventListener("mouseup", () => {
+      isDown = false;
+      slider.classList.remove("active");
+      setTimeout(() => {
+        wasDragging = false;
+        leftWhileDown = false;
+      }, 50);
+    });
+
+    slider.addEventListener("mousemove", (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX;
+      const walk = (x - startX) * 1.5; // tốc độ cuộn
+      if (Math.abs(x - startX) > 5) wasDragging = true;
+      slider.scrollLeft = scrollLeft - walk;
+    });
+
+    // --- Click để điều hướng ---
+    slidesContainer.addEventListener("click", (e) => {
+      const slideEl = e.target.closest(".slide");
+      if (!slideEl) return;
+
+      if (wasDragging || leftWhileDown) {
+        e.stopPropagation();
+        return;
+      }
+
+      const chapterId = slideEl.dataset.chapter;
+      if (chapterId) {
+        window.location.href = `challenges.html?chapter_id=${chapterId}`;
+      }
+    });
+  }
+
+  // ======= Khởi chạy =======
+  loadLessons();
+</script>
+
+
+</body>
+</html>

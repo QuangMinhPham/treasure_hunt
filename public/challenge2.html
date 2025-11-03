@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trò chơi mở rương học tập 🔑</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(120deg, #a8edea, #fed6e3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    h1 { color: #333; }
+
+    .game-container {
+      display: flex;
+      justify-content: center;
+      width: 85%;
+      margin-top: 30px;
+    }
+
+    .cl-chest, .cl-key {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+    }
+    .cl-chest { width: 65%; }
+    .cl-key { width: 30%; }
+
+    .chest-box, .key-box {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: rgba(255,255,255,0.85);
+      padding: 10px 15px;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+      justify-content: flex-start;
+      transition: all 0.3s ease;
+    }
+
+    .chest-box { width: 500px; min-height: 100px; }
+    .chest { width: 80px; cursor: pointer; }
+    .question, .answer {
+      background: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      font-weight: 500;
+      flex: 1;
+      text-align: center;
+    }
+
+    .key { width: 60px; }
+    .chest-box.expand { transform: scale(1.05); background: rgba(255,255,200,0.8); }
+    .chest-box.has-key { background: rgba(255,255,240,0.95); box-shadow: 0 0 12px rgba(255,215,0,0.7); }
+
+    button {
+      margin-top: 30px;
+      padding: 10px 25px;
+      border: none;
+      background: #4CAF50;
+      color: white;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    /* --- Hộp thông báo --- */
+    #announcement {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.95);
+      border-radius: 15px;
+      padding: 40px 50px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+
+    #announcement h2 { color: #1e88e5; margin-bottom: 15px; }
+    #announcement button {
+      margin: 10px;
+      padding: 10px 25px;
+      background: #4CAF50;
+      color: white;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    #announcement button:hover {
+      background: #43a047;
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9998;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🔐 Trò chơi mở rương học tập 🔑</h1>
+
+  <div class="game-container">
+    <div class="column cl-chest" id="chests"></div>
+    <div class="column cl-key" id="keys"></div>
+  </div>
+
+  <button id="submit">📤 Nộp bài</button>
+
+  <!-- Overlay + thông báo -->
+  <div id="overlay"></div>
+  <div id="announcement">
+    <h2>Kết quả 🎉</h2>
+    <p id="resultText"></p>
+    <div>
+      <button onclick="window.location.href='challenges.html'">➡️ Thử thách tiếp</button>
+      <button onclick="window.location.reload()">🔁 Chơi lại</button>
+      <button onclick="window.location.href='leaderboard.html'">🏆 Bảng xếp hạng</button>
+      <button onclick="window.location.href='lessons.html'">🔙 Danh sách bài</button>
+      <button onclick="window.location.href='index.html'">🏠 Trang chủ</button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const chapterId = params.get("chapter_id") || 1;
+    const API_URL = `/api/challenges/matching/${chapterId}`;
+
+    const chestsDiv = document.getElementById("chests");
+    const keysDiv = document.getElementById("keys");
+    const matches = {};
+
+    function extractFirstLetterFromRightText(text) {
+      const m = text.trim().match(/^([A-Za-z0-9])/);
+      return m ? m[1].toLowerCase() : "";
+    }
+
+    function normalizeExpectedFromCorrectMatch(cm) {
+      if (!cm) return "";
+      const parts = cm.split("-");
+      const candidate = parts.length > 1 ? parts[1] : parts[0];
+      return candidate.toLowerCase().replace(/[).]/g, "");
+    }
+
+    async function loadMatching() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      if (!data.questions?.length) return alert("Không có dữ liệu!");
+
+      const pairs = data.questions.flatMap(q => q.pairs);
+      pairs.forEach((p, i) => {
+        const expected = normalizeExpectedFromCorrectMatch(p.correct_match);
+        const div = document.createElement("div");
+        div.className = "chest-box";
+        div.dataset.index = i;
+        div.dataset.expected = expected;
+        div.innerHTML = `
+          <img src="images/ruongkhoa.png" class="chest">
+          <div class="question">${p.left_text}</div>
+        `;
+        chestsDiv.appendChild(div);
+      });
+
+      pairs.forEach((p, i) => {
+        const rightLetter = extractFirstLetterFromRightText(p.right_text);
+        const div = document.createElement("div");
+        div.className = "key-wrapper";
+        div.setAttribute("draggable", "true");
+        div.dataset.index = i;
+        div.dataset.rightLetter = rightLetter;
+        div.innerHTML = `
+          <div class="key-box">
+            <img src="images/chiakhoa.png" class="key">
+            <div class="answer">${p.right_text}</div>
+          </div>
+        `;
+        keysDiv.appendChild(div);
+      });
+
+      initDragDrop();
+    }
+
+    function initDragDrop() {
+      const chests = document.querySelectorAll(".chest-box");
+      const keyWrappers = document.querySelectorAll(".key-wrapper");
+      const keysColumn = document.getElementById("keys");
+
+      keyWrappers.forEach(wrapper => {
+        wrapper.addEventListener("dragstart", e => {
+          e.dataTransfer.setData("text/plain", wrapper.dataset.index);
+        });
+      });
+
+      chests.forEach(chest => {
+        chest.addEventListener("dragover", e => { e.preventDefault(); chest.classList.add("expand"); });
+        chest.addEventListener("dragleave", () => chest.classList.remove("expand"));
+        chest.addEventListener("drop", e => {
+          e.preventDefault();
+          const wrapperIndex = e.dataTransfer.getData("text/plain");
+          const wrapper = document.querySelector(`.key-wrapper[data-index='${wrapperIndex}']`);
+          if (!wrapper || chest.querySelector(".key-wrapper")) return;
+          chest.appendChild(wrapper);
+          chest.classList.add("has-key");
+          matches[chest.dataset.index] = wrapper;
+          setTimeout(() => chest.classList.remove("expand"), 600);
+        });
+      });
+
+      keysColumn.addEventListener("dragover", e => e.preventDefault());
+      keysColumn.addEventListener("drop", e => {
+        e.preventDefault();
+        const wrapperIndex = e.dataTransfer.getData("text/plain");
+        const wrapper = document.querySelector(`.key-wrapper[data-index='${wrapperIndex}']`);
+        if (wrapper) keysColumn.appendChild(wrapper);
+        for (let chestIndex in matches)
+          if (matches[chestIndex]?.dataset.index === wrapperIndex)
+            delete matches[chestIndex];
+      });
+    }
+
+    document.getElementById("submit").addEventListener("click", () => {
+      const chests = document.querySelectorAll(".chest-box");
+      let correct = 0;
+
+      chests.forEach(chest => {
+        const expected = chest.dataset.expected;
+        const wrapper = matches[chest.dataset.index];
+        const chestImg = chest.querySelector(".chest");
+        if (!wrapper) return;
+
+        const rightLetter = wrapper.dataset.rightLetter;
+        if (expected === rightLetter) {
+          correct++;
+          chestImg.src = "images/ruongmo.png";
+        } else {
+          chestImg.src = "images/ruongkhoaden.png";
+        }
+      });
+
+      showResult(correct, chests.length);
+    });
+
+    function showResult(correct, total) {
+      const overlay = document.getElementById("overlay");
+      const box = document.getElementById("announcement");
+      const text = document.getElementById("resultText");
+
+      const score = Math.round((correct / total) * 100);
+      let msg = score >= 80 ? "🌟 Xuất sắc!"
+              : score >= 50 ? "👍 Khá lắm!"
+              : "💪 Cố gắng thêm nhé!";
+
+      text.innerHTML = `${msg}<br>Bạn mở đúng <b>${correct}/${total}</b> rương (${score} điểm)`;
+
+      overlay.style.display = "block";
+      box.style.display = "block";
+      saveScore(score)
+    }
+
+    loadMatching();
+
+    async function saveScore(score) {
+        const token = localStorage.getItem("token"); // token lưu khi login
+        const params = new URLSearchParams(window.location.search);
+        const chapterId = params.get("chapter_id");
+        const challengeId = 2+((chapterId-1)*3); // challenge tương ứng trong DB
+
+        const res = await fetch("/api/scores/save", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            chapter_id: chapterId,
+            challenge_id: challengeId,
+            score: score
+          })
+        });
+
+        const data = await res.json();
+        console.log("Kết quả lưu điểm:", data);
+      }
+  </script>
+</body>
+</html>

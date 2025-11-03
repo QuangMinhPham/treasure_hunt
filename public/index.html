@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Đảo Giấu Vàng 🏴‍☠️</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <video class="bg-video" autoplay muted loop playsinline poster="images/homepage_background.png">
+    <source src="images/background.mp4" type="video/mp4">
+  </video>
+
+  <div class="toolbar">
+    <div class="titlegame">
+      <img src="images/icon.png" style="height:50px;">
+      <div class="titlegame_name">ĐẢO GIẤU VÀNG</div>
+    </div>
+
+    <div class="sign_btn" id="auth-section">
+      <a class="signin-btn" href="login.html">Sign In</a>
+      <a class="signup-btn" href="register.html">Sign Up</a>
+    </div>
+  </div>
+
+  <div class="options-btn">
+    <a href="lessons.html" class="option-btn">🏝️ Truy Tìm Kho Báu</a>
+    <a href="leaderboard.html" class="option-btn">🏆 Bảng Xếp Hạng</a>
+    <a href="instruction.html" class="option-btn">📜 Hướng Dẫn</a>
+  </div>
+
+  <script>
+    const authSection = document.getElementById('auth-section');
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const username = payload.user_name || "Người chơi";
+        const avatar = localStorage.getItem('avatar') || "images/default_avatar.jpg";
+
+        authSection.innerHTML = `
+          <div class="user-info" id="user-info">
+            <span class="user-name">👋Hi, ${username} </span>
+            <img src="${avatar}" alt="User Avatar">
+            <div class="logout-menu" id="logout-menu">
+              <button id="profile-btn">👤 Thông tin cá nhân</button>
+              <button id="stats-btn">🏆 Thành tích</button>
+              <button id="logout-btn">Đăng xuất</button>
+            </div>
+          </div>
+        `;
+
+        const userInfo = document.getElementById("user-info");
+        const logoutMenu = document.getElementById("logout-menu");
+        userInfo.addEventListener("click", (e) => {
+          e.stopPropagation();
+          logoutMenu.style.display = logoutMenu.style.display === "flex" ? "none" : "flex";
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!userInfo.contains(e.target)) logoutMenu.style.display = "none";
+        });
+
+        document.getElementById("profile-btn").addEventListener("click", () => {
+          window.location.href = "profile.html";
+        });
+        document.getElementById("stats-btn").addEventListener("click", () => {
+          window.location.href = "leaderboard.html";
+        });
+        document.getElementById("logout-btn").addEventListener("click", () => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("avatar");
+          window.location.reload();
+        });
+
+      } catch (err) {
+        console.warn("Token không hợp lệ:", err);
+        localStorage.removeItem("token");
+      }
+    }
+
+    const video = document.querySelector('.bg-video');
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) video.pause();
+      else video.play().catch(()=>{});
+    });
+  </script>
+</body>
+</html>

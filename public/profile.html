@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>🏝️ Hồ sơ người chơi | Đảo Giấu Vàng</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(120deg, #a8edea, #fed6e3);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding-top: 50px;
+    }
+
+    .profile-container {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 400px;
+      padding: 30px 25px;
+      text-align: center;
+      position: relative;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+      color: #333;
+      font-weight: 700;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #f0b400;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .change-avatar-btn {
+      display: block;
+      margin: 10px auto;
+      font-size: 14px;
+      background: #f5c84c;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .change-avatar-btn:hover { background: #ffdb69; }
+
+    .avatar-list {
+      display: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .avatar-list img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: 0.2s;
+    }
+
+    .avatar-list img:hover {
+      border-color: #f0b400;
+      transform: scale(1.1);
+    }
+
+    .field {
+      text-align: left;
+      margin: 15px 0;
+      font-size: 16px;
+    }
+
+    .field label { font-weight: 600; color: #333; }
+
+    .field input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    .readonly { background: #f5f5f5; color: #777; }
+
+    .edit-btn, .save-btn {
+      background: #31ADD1;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      margin-left: 8px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .edit-btn:hover, .save-btn:hover { background: #2394b3; }
+
+    .password-wrapper { position: relative; }
+    .eye-icon {
+      position: absolute;
+      right: 10px;
+      top: 9px;
+      cursor: pointer;
+    }
+
+    .logout-btn {
+      background: #ff6666;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .logout-btn:hover { background: #ff3333; }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <h2>🏝️ Thông tin người dùng</h2>
+
+    <img src="images/default_avatar.jpg" alt="Avatar" id="avatar" class="avatar">
+    <button class="change-avatar-btn" id="changeAvatarBtn">Đổi avatar</button>
+
+    <div class="avatar-list" id="avatarList">
+      <!-- 10 avatar có sẵn -->
+      <img src="images/avatars/av1.png">
+      <img src="images/avatars/av2.png">
+      <img src="images/avatars/av3.png">
+      <img src="images/avatars/av4.png">
+      <img src="images/avatars/av5.png">
+      <img src="images/avatars/av6.png">
+      <img src="images/avatars/av7.png">
+      <img src="images/avatars/av8.png">
+      <img src="images/avatars/av9.png">
+      <img src="images/avatars/av10.png">
+      <input type="file" id="uploadAvatar" accept="image/*" style="display:none;">
+    </div>
+
+    <div class="field">
+      <label for="username">Tên hiển thị:</label>
+      <div style="display:flex; align-items:center;">
+        <input type="text" id="username" disabled class="readonly">
+        <button class="edit-btn" id="editNameBtn">✏️</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="email">Email:</label>
+      <input type="email" id="email" disabled class="readonly">
+    </div>
+
+    <div class="field">
+      <label for="password">Mật khẩu:</label>
+      <div class="password-wrapper">
+        <input type="password" id="oldPass" placeholder="Mật khẩu cũ">
+        <span class="eye-icon" id="togglePassword">👁️</span>
+      </div>
+      <input type="password" id="newPass" placeholder="Mật khẩu mới" style="margin-top:8px;">
+      <button class="save-btn" id="changePassBtn">Đổi mật khẩu</button>
+    </div>
+
+    <button class="logout-btn" id="logoutBtn">🚪 Đăng xuất</button>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) location.href = "login.html";
+
+    // ==== Load thông tin hồ sơ ====
+    async function loadProfile() {
+      const res = await fetch("/api/profile", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      document.getElementById("avatar").src = data.avatar_url || "images/default_avatar.jpg";
+      document.getElementById("username").value =  data.username;
+      document.getElementById("email").value = data.email;
+    }
+
+    // ==== Sửa tên ====
+    document.getElementById("editNameBtn").onclick = async () => {
+      const input = document.getElementById("username");
+      const btn = document.getElementById("editNameBtn");
+
+      if (input.disabled) {
+        input.disabled = false;
+        input.classList.remove("readonly");
+        btn.textContent = "💾";
+      } else {
+        const username = input.value;
+        await fetch("/api/profile/name", {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username })
+        });
+        alert("✅ Đổi tên thành công!");
+        input.disabled = true;
+        input.classList.add("readonly");
+        btn.textContent = "✏️";
+      }
+    };
+
+    // ==== Avatar ====
+    const avatar = document.getElementById("avatar");
+    const avatarList = document.getElementById("avatarList");
+    const uploadAvatar = document.getElementById("uploadAvatar");
+
+    document.getElementById("changeAvatarBtn").onclick = () => {
+      avatarList.style.display = avatarList.style.display === "flex" ? "none" : "flex";
+    };
+
+    avatarList.querySelectorAll("img").forEach(img => {
+      img.onclick = async () => {
+        await fetch("/api/profile/avatar", {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ avatar_url: img.src })
+        });
+        avatar.src = img.src;
+        avatarList.style.display = "none";
+        alert("✅ Đổi avatar thành công!");
+      };
+    });
+
+    // Cho phép upload ảnh riêng
+    const uploadBtn = document.createElement("button");
+    uploadBtn.textContent = "📤 Tải ảnh của bạn";
+    uploadBtn.className = "change-avatar-btn";
+    uploadBtn.onclick = () => uploadAvatar.click();
+    avatarList.appendChild(uploadBtn);
+
+    uploadAvatar.onchange = async (e) => {
+      const formData = new FormData();
+      formData.append("avatar", e.target.files[0]);
+
+      const res = await fetch("/api/profile/avatar", {
+        method: "PUT",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      avatar.src = data.avatar_url;
+      alert("✅ Cập nhật avatar thành công!");
+    };
+
+    // ==== Hiện / ẩn mật khẩu ====
+    const toggle = document.getElementById("togglePassword");
+    toggle.onclick = () => {
+      const input = document.getElementById("oldPass");
+      input.type = input.type === "password" ? "text" : "password";
+    };
+
+    // ==== Đổi mật khẩu ====
+    document.getElementById("changePassBtn").onclick = async () => {
+      const old_password = document.getElementById("oldPass").value;
+      const new_password = document.getElementById("newPass").value;
+      if (!old_password || !new_password) return alert("Vui lòng nhập đủ thông tin!");
+      const res = await fetch("/api/profile/password", {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ old_password, new_password })
+      });
+      const data = await res.json();
+      alert(data.message || "Đổi mật khẩu xong!");
+    };
+
+    // ==== Đăng xuất ====
+    document.getElementById("logoutBtn").onclick = () => {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    };
+
+    loadProfile();
+  </script>
+</body>
+</html>

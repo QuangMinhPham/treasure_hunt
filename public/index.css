@@ -1,0 +1,166 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Poppins', sans-serif; }
+
+    .bg-video {
+      position: fixed;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.15);
+      z-index: -1;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 1000px;
+      max-width: 95%;
+      height: 65px;
+      margin: 20px auto 0;
+      border-radius: 50px;
+      border: 1px solid black;
+      box-shadow: 5px 6px 5px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(135deg, rgba(49, 173, 209, 0.75), rgba(243, 211, 67, 0.75));
+      padding: 0 40px;
+    }
+
+    .titlegame {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .titlegame_name {
+      font-size: 25px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .sign_btn {
+      display: flex;
+      gap: 10px;
+    }
+
+    .signin-btn, .signup-btn {
+      padding: 10px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: black;
+      background-color: rgba(24, 218, 252, 0.55);
+      border-radius: 20px;
+      border: 1px solid black;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .signin-btn:hover, .signup-btn:hover {
+      scale: 1.05;
+      color: #ffd700;
+    }
+
+    .options-btn {
+      height: calc(100% - 150px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 25px;
+    }
+
+    .option-btn {
+      background-color: rgba(0, 0, 0, 0.65);
+      padding: 18px 25px;
+      border-radius: 25px;
+      font-size: 25px;
+      font-weight: bold;
+      width: 350px;
+      text-align: center;
+      color: white;
+      border: 1px solid black;
+      box-shadow: 0 5px 5px rgba(0,0,0,0.45);
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .option-btn:hover {
+      color: rgb(255, 234, 0);
+      transform: scale(1.05);
+    }
+
+    /* ==== USER AREA ==== */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .user-info img {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      object-fit: cover;
+    }
+
+    .user-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #222;
+    }
+
+    .logout-menu {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 10px 15px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+      display: none;
+      flex-direction: column;
+      min-width: 160px;
+      animation: fadeIn 0.3s ease;
+      z-index: 10;
+    }
+
+    .logout-menu button {
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #222;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    .logout-menu button:hover {
+      background-color: rgba(255, 215, 0, 0.2);
+    }
+    
+
+    #logout-btn {
+        background-color: red;
+        color:white;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }

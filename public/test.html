@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Background Toggle: Video / Ảnh</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      height: 100%;
+      font-family: system-ui, sans-serif;
+    }
+
+    /* Video nền */
+    .bg-video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Overlay */
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      /* background: rgba(0,0,0,0.4); */
+      z-index: -1;
+      scale: 0.7;
+    }
+
+    /* Background ảnh (ban đầu dùng nếu video bị tắt) */
+    body.bg-image {
+      background: url("images/frame.jpg") center/cover no-repeat fixed;
+    }
+
+    /* Nội dung */
+    .container {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      gap: 1rem;
+    }
+
+    button {
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    button:hover {
+      background: rgba(255,255,255,0.25);
+    }
+  </style>
+</head>
+<body class="bg-image">
+  <!-- Video nền -->
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="images/homepage_background.mp4" type="video/mp4">
+  </video>
+
+  <!-- Overlay -->
+  <div class="bg-overlay"></div>
+
+  <!-- Nội dung -->
+  <div class="container">
+    <h1>Truy tìm kho báu</h1>
+    <p>Bạn có muốn dùng nền động hay nền tĩnh?</p>
+    <button id="toggleBtn">Dùng nền động (video)</button>
+  </div>
+
+  <script>
+    const body = document.body;
+    const video = document.querySelector(".bg-video");
+    const btn = document.getElementById("toggleBtn");
+
+    let useVideo = false; // mặc định: dùng ảnh
+
+    function updateBackground() {
+      if (useVideo) {
+        video.style.display = "block";
+        body.classList.remove("bg-image");
+        btn.textContent = "Dùng nền tĩnh (ảnh)";
+        video.play().catch(()=>{});
+      } else {
+        video.style.display = "none";
+        body.classList.add("bg-image");
+        btn.textContent = "Dùng nền động (video)";
+      }
+    }
+
+    btn.addEventListener("click", () => {
+      useVideo = !useVideo;
+      updateBackground();
+    });
+
+    // Khởi tạo
+    updateBackground();
+  </script>
+</body>
+</html>

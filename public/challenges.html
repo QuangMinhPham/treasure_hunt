@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chọn Thử Thách Kho Báu 🏝️</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: url("images/treasure_map.jpg") no-repeat center center/cover;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+
+    h1 {
+      z-index: 2;
+      font-size: 2.2em;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .challenge-container {
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .challenge-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      width: 240px;
+      padding: 20px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .challenge-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(255,215,0,0.6);
+    }
+
+    .challenge-card img {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    .challenge-card h2 {
+      color: #333;
+      margin: 10px 0 5px;
+      font-size: 1.3em;
+    }
+
+    .challenge-card p {
+      color: #555;
+      font-size: 0.95em;
+    }
+
+    .back-btn {
+      z-index: 2;
+      margin-top: 40px;
+      padding: 10px 25px;
+      border: none;
+      background: linear-gradient(135deg, #00bfa5, #009688);
+      color: white;
+      font-size: 1em;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .back-btn:hover {
+      background: linear-gradient(135deg, #009688, #00796b);
+    }
+
+    @media (max-width: 768px) {
+      .challenge-container {
+        flex-direction: column;
+        gap: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <h1>🪙 Chọn Thử Thách Của Bạn 🏴‍☠️</h1>
+
+  <div class="challenge-container" id="challenge-list">
+    <!-- Các challenge sẽ được load tự động -->
+  </div>
+
+  <button class="back-btn" onclick="window.location.href='lessons.html'">⬅️ Quay lại bài học</button>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const chapterId = params.get("chapter_id") || 1;
+
+    // Dữ liệu mẫu (có thể thay bằng API thực tế nếu cần)
+    const challengeTypes = [
+      { id: 1, name: "Thử Thách 1: Câu hỏi trắc nghiệm", icon: "images/quiz_icon.png", url: "challenge1.html", des:"Dọn dẹp rác trên bãi biển" },
+      { id: 2, name: "Thử Thách 2: Nối chìa mở kho báu", icon: "images/matching_icon.jpg", url: "challenge2.html" , des:"Đưa chìa khóa vào đúng rương" },
+      { id: 3, name: "Thử Thách 3: Trả lời nhanh", icon: "images/short_icon.png", url: "challenge3.html", des:"Khám phá thử thách thứ 3 trong hành trình" }
+    ];
+
+    const container = document.getElementById("challenge-list");
+
+    challengeTypes.forEach((ch, index) => {
+      const div = document.createElement("div");
+      div.className = "challenge-card";
+      div.innerHTML = `
+        <img src="${ch.icon}" alt="${ch.name}">
+        <h2>${ch.name}</h2>
+        <p>${ch.des}</p>
+      `;
+      div.addEventListener("click", () => {
+        window.location.href = `${ch.url}?chapter_id=${chapterId}`;
+      });
+      container.appendChild(div);
+    });
+  </script>
+</body>
+</html>
